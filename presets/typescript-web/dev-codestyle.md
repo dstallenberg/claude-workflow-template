@@ -1,0 +1,7 @@
+- Use TypeScript strict mode — no `any` types unless absolutely necessary
+- Prefer interfaces over type aliases for object shapes
+- Use `const` by default, `let` when mutation is needed, never `var`
+- Async/await over raw promises — no callback-style code
+- Keep components/modules small and focused — one responsibility per file
+- Use the project's existing patterns for state management, routing, and API calls
+- Keep imports organized: external libraries first, then internal modules

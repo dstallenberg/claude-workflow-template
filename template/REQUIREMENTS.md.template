@@ -1,0 +1,49 @@
+# PROJECT_NAME
+
+## Vision
+<!-- 2-3 paragraphs describing the project's purpose, target audience, and what makes it unique -->
+
+## PROJECT_DOMAIN Vision
+
+<!-- Detailed design descriptions organized by theme. Each section should cover:
+     - What the feature/system does
+     - Key design decisions and tradeoffs
+     - How it interacts with other systems
+     - Reference comparable products where relevant -->
+
+## Technical Foundation
+- **Language:** LANGUAGE
+- **Architecture:** ARCHITECTURE
+<!-- Other key technical decisions -->
+
+---
+
+## Milestones
+
+Each milestone is a self-contained deliverable. Work through them in order. Each milestone should result in something runnable and testable.
+
+Milestone order: M-FIRST → M-SECOND → ...
+
+Each file is at `milestones/M-NAME.md` — contains subtasks, architecture notes, and resolved design questions.
+
+| Milestone | Status | Description |
+|-----------|--------|-------------|
+| [M-FIRST](milestones/M-FIRST.md) | | First milestone description |
+
+---
+
+## Non-Functional Requirements
+
+| Category | Requirement |
+|---|---|
+| **Performance** | ... |
+| **Security** | ... |
+| **Testability** | ... |
+
+---
+
+## Technical Risks & Decisions to Make Early
+
+1. **Risk or decision** (which milestone) — context and status
+
+---

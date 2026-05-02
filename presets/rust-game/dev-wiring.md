@@ -1,0 +1,2 @@
+- When creating a new system, add it to `systems/mod.rs` and wire it into the game loop in `app.rs`
+- When adding a new component, add its storage to `World` and register it in `World::new()`

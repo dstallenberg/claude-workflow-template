@@ -1,0 +1,1 @@
+key files in `common/src/`, `client/src/`, `server/src/`

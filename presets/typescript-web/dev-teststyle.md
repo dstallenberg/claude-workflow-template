@@ -1,0 +1,5 @@
+- Write unit tests for business logic, utilities, and API handlers
+- Follow existing test patterns (check `__tests__/` or `*.test.ts` files)
+- Use the project's test framework (Jest, Vitest, etc.) — check package.json
+- Run `npm test` after implementation to verify nothing broke
+- Run `npm run build` to verify compilation

@@ -1,0 +1,7 @@
+- Components: plain structs, derive `Debug, Clone, Copy, serde::Serialize, serde::Deserialize`
+- Systems: free functions `fn system_name(world: &mut World, ...)` — no `Rc<RefCell<>>`
+- Game logic lives in systems, not component structs
+- `f32` for coordinates, positions, velocities
+- Renderer is isolated from ECS — game logic must be testable without GPU
+- Sparse-set storage: use existing `ComponentStorage<T>` patterns
+- Keep imports minimal — don't add crates unless the subtask explicitly requires one

@@ -1,0 +1,1 @@
+`cargo test` and `cargo build`

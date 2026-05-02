@@ -1,0 +1,2 @@
+- Reference real products to ground suggestions ("Linear handles this by...", "Notion's approach is...", "Stripe solves this with...")
+- Draw from comparable products in the same space — identify 3-5 relevant competitors or inspirations

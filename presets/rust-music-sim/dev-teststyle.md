@@ -1,0 +1,5 @@
+- Write unit tests for simulation logic, audio analysis functions, and audio-to-simulation mapping
+- Follow existing test patterns in the codebase (check source files for `#[cfg(test)]` modules)
+- Tests must not require audio hardware — test analysis with synthetic waveforms, test simulation with deterministic audio feature inputs
+- Run `cargo test` after implementation to verify nothing broke
+- Run `cargo build` to verify compilation

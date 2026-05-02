@@ -1,0 +1,51 @@
+# PROJECT_NAME
+
+## Project Overview
+<!-- TODO: 2-3 sentences describing what this project is -->
+
+## Architecture
+<!-- TODO: Key architectural decisions as bullet points -->
+
+## Project Structure
+```
+<!-- TODO: File tree with one-line descriptions of each file/directory -->
+```
+
+## Build & Run
+```bash
+# TODO: Build, test, and run commands
+```
+
+## Requirements
+`REQUIREMENTS.md` has the vision, design, and milestone index table. Each milestone's subtasks and resolved design questions are in `milestones/M-NAME.md`. Work on milestones in order. Each session should tackle one subtask (e.g., M-FIRST.1, M-FIRST.2).
+
+**After completing a subtask**: mark it `[x]` in the milestone file, and if it's the last subtask, mark the milestone ✅ in the `REQUIREMENTS.md` index table.
+
+## Conventions
+<!-- INJECT:CONVENTIONS -->
+
+## Code Standards (Enforced During Creation)
+These standards must be followed when writing new code, not just checked before committing:
+
+<!-- INJECT:CODE_STANDARDS -->
+
+## Error Handling
+<!-- INJECT:ERROR_HANDLING -->
+
+## Testing
+<!-- INJECT:TESTING -->
+
+## Git Workflow
+- **`main` is the stable branch**: Should always compile and pass tests.
+- **Commit per logical change**: One commit per subtask or coherent change. Not one commit per file.
+- **Commit messages**: Short imperative description of what changed and why. Reference milestone if relevant (e.g., "M-FIRST.1: Add initial scaffolding").
+- **Never use `git checkout` to revert**: When reverting changes, manually undo them instead of using `git checkout`, `git restore`, or `git reset`. Only use them if the user explicitly approves.
+
+## Dependencies
+<!-- INJECT:DEPENDENCY_PHILOSOPHY -->
+
+## Completed Milestones
+<!-- Updated as milestones are finished -->
+
+## Logging
+<!-- INJECT:LOGGING -->

@@ -1,0 +1,5 @@
+- Write unit tests for new game logic (systems, data structures, algorithms)
+- Follow existing test patterns in the codebase (check source files for `#[cfg(test)]` modules)
+- Tests must not require GPU/rendering — test logic only
+- Run `cargo test` after implementation to verify nothing broke
+- Run `cargo build` to verify compilation

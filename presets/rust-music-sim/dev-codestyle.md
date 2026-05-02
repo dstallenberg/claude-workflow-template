@@ -1,0 +1,8 @@
+- Simulation entities are plain structs, derive `Debug, Clone, Copy` and `serde::Serialize, serde::Deserialize`
+- Systems are free functions that operate on the simulation state — no `Rc<RefCell<>>`
+- Use `f64` for simulation coordinates, masses, velocities (precision matters at cosmic scale)
+- Use `f32` for audio sample data and FFT/analysis parameters
+- Audio analysis runs in a separate thread — results are sent to the simulation via lock-free channels or ring buffers
+- The simulation consumes audio features (energy, spectrum, beats, onset) and maps them to physical forces, spawning, colors, and behaviors
+- Simulation runs at a fixed timestep; audio features are interpolated/smoothed to avoid jitter
+- Keep imports minimal — don't add crates unless the subtask explicitly requires one

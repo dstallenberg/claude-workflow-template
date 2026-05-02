@@ -1,0 +1,2 @@
+- Reference real projects to ground suggestions ("Winamp's AVS/Milkdrop handles this by...", "Plane9's approach is...", "Shadertoy solves this with...")
+- Draw from comparable projects: Milkdrop/projectM, Plane9, Magic Music Visuals, TouchDesigner, Processing/p5.js audio visualizations, Electric Sheep, Universe Sandbox (for physics), Synesthesia

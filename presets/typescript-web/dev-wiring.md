@@ -1,0 +1,3 @@
+- When creating a new API route, add it to the router and update any route index/barrel files
+- When adding a new component, export it from the relevant index file
+- When adding a new service/utility, register it in the dependency injection container if one exists

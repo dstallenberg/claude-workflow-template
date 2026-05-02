@@ -1,0 +1,2 @@
+- Reference real games to ground suggestions ("DayZ handles this by...", "Tarkov solves this with...", "Project Zomboid's approach is...")
+- Draw from comparable titles: DayZ, Project Zomboid, Rust, Escape from Tarkov, Hotline Miami, devast.io

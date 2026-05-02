@@ -1,0 +1,3 @@
+- When creating a new simulation system, add it to the simulation loop and ensure it runs at fixed timestep
+- When adding a new audio analysis feature (e.g., beat detection, spectral flux), register it in the audio analysis pipeline and expose its output for simulation consumption
+- When adding a new entity type, add its storage to the simulation state and handle it in serialization
