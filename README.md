@@ -1,14 +1,17 @@
 # Claude Workflow Template
 
-A reusable project scaffold for milestone-driven development with Claude Code. Provides structured skills (`/dev`, `/requirements`, `/design`), document templates, and language/domain presets.
+A reusable project scaffold for milestone-driven development with Claude Code. Provides structured skills (`/dev`, `/requirements`, `/design`, `/refactor`, `/refactor-investigation`), document templates, and language/domain presets.
 
 ## What You Get
 
 - **`/dev`** — Developer agent that reads your requirements, implements a subtask, runs tests, and updates milestone progress
 - **`/requirements`** — Requirements interviewer that finds design gaps, presents A/B/C/D options, and records decisions in milestone files
 - **`/design`** — Domain designer that analyzes your project for missing capabilities, underspecified interactions, and design gaps
+- **`/refactor-investigation`** — Tech-debt surveyor that scans the codebase for new refactor candidates (long files, panics, duplication, architectural friction) and appends them to `TECH_DEBT.md`. Idempotent — skips items already tracked
+- **`/refactor`** — Executes a single open `[ ]` item from `TECH_DEBT.md`: prompts the user to pick which, implements it surgically, runs the build/test gate, and marks the item resolved
 - **REQUIREMENTS.md** — Project vision, milestone index table with status tracking
 - **milestones/M-NAME.md** — Numbered subtask checklists with resolved design questions
+- **TECH_DEBT.md** — Refactor candidates and known smells, tracked with the same `[ ]` / `[x] ✅ <date>` convention as milestones (created on first `/refactor-investigation` run)
 - **CLAUDE.md** — Project conventions, architecture, and coding standards
 
 ## Quick Start
@@ -33,6 +36,11 @@ It creates the directory structure, skills, and document templates. Files that a
 5. **Run `/dev M-NAME.1`** — Claude implements a subtask, runs tests, marks it done
 
 Each `/dev` session automatically updates the milestone checkbox and documentation.
+
+Ongoing, alongside the milestone work:
+
+- **`/refactor-investigation`** — periodically (e.g. after shipping a milestone) to capture tech debt accumulated during recent work
+- **`/refactor`** — when you want to spend a session paying down debt instead of shipping features; pick one item, fix it, move on
 
 ## Presets
 
@@ -70,12 +78,15 @@ presets/your-preset/
 your-project/
   .claude/
     commands/
-      dev.md               # /dev skill
-      requirements.md      # /requirements skill
-      design.md            # /design skill
+      dev.md                       # /dev skill
+      requirements.md              # /requirements skill
+      design.md                    # /design skill
+      refactor.md                  # /refactor skill
+      refactor-investigation.md    # /refactor-investigation skill
     settings.local.json    # Permissions
   CLAUDE.md                # Project conventions (fill in TODOs)
   REQUIREMENTS.md          # Vision + milestone table
+  TECH_DEBT.md             # Refactor candidates (created on first /refactor-investigation)
   milestones/
     M-EXAMPLE.md           # Format reference (delete when you have real milestones)
 ```

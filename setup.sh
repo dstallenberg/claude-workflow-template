@@ -102,7 +102,7 @@ fi
 
 # --- Copy skill files ---
 
-for skill in dev requirements design; do
+for skill in dev requirements design refactor refactor-investigation; do
     target=".claude/commands/${skill}.md"
     if [[ -f "$target" ]]; then
         info "Skipping $target (already exists)"
@@ -130,6 +130,13 @@ for skill in dev requirements design; do
                 inject_preset_awk "$target" "DESIGN_ROLE" "$PRESET_PATH/design-role.md"
                 inject_preset_awk "$target" "ANALYSIS_CATEGORIES" "$PRESET_PATH/design-categories.md"
                 inject_preset_awk "$target" "DOMAIN_REFERENCES" "$PRESET_PATH/design-references.md"
+                ;;
+            refactor)
+                inject_preset_awk "$target" "CODE_STYLE" "$PRESET_PATH/dev-codestyle.md"
+                inject_preset_awk "$target" "BUILD_COMMANDS" "$PRESET_PATH/dev-buildcommands.md"
+                ;;
+            refactor-investigation)
+                inject_preset_awk "$target" "SOURCE_DIRS" "$PRESET_PATH/requirements-sourcedirs.md"
                 ;;
         esac
     fi
