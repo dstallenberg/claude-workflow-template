@@ -1,6 +1,14 @@
+---
+name: refactor-investigation
+description: Survey the codebase for new tech debt (long files, panics, duplication, architectural friction) and append findings to TECH_DEBT.md.
+disable-model-invocation: true
+---
+
 # Refactor Investigation
 
 You are doing a tech-debt survey of the codebase and appending new findings to `TECH_DEBT.md` at the repo root. This skill is **index-only** — never edit source code, never commit, never open PRs.
+
+Stay in the main checkout — this session doesn't change code, so it doesn't need a worktree.
 
 ## Startup
 
@@ -69,7 +77,7 @@ If no new debt was found, say so explicitly and exit. Don't pad. Don't speculate
 ## Hard rules
 
 - Don't edit any source code. `TECH_DEBT.md` is the only file you touch.
-- Don't run `git commit`, `git push`, or any destructive git command. The user reviews + commits the doc update.
+- Don't run `git commit`, `git push`, or any destructive git command. `TECH_DEBT.md` is left modified in the working tree — the user reviews and commits it.
 - Don't propose fixes — that's `/refactor`'s job. Identify candidates only.
 - If an Explore agent returns vague items (no `file:line`, no concrete signal), drop them. Quality over quantity.
 

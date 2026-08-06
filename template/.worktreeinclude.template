@@ -1,0 +1,8 @@
+# Gitignored files copied into every worktree Claude Code creates.
+# Uses .gitignore syntax. Only files that match a pattern AND are gitignored get
+# copied, so tracked files are never duplicated.
+#
+# Uncomment or add what a fresh checkout of this project needs to run:
+# .env
+# .env.local
+# config/secrets.json

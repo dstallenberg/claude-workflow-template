@@ -35,11 +35,27 @@ These standards must be followed when writing new code, not just checked before 
 ## Testing
 <!-- INJECT:TESTING -->
 
+## Parallel Sessions (Worktrees)
+Several Claude sessions run against this repo at once, so code sessions are isolated in git worktrees.
+
+- **Code sessions (`/dev`, `/refactor`) run in a worktree.** If the session is not already in one (`git worktree list`, or a cwd under `.claude/worktrees/`), call `EnterWorktree` before editing code, named after the subtask — `M-FIRST-1` for `M-FIRST.1`, or a short kebab-case slug otherwise.
+- **Doc-only sessions (`/requirements`, `/design`, `/refactor-investigation`) stay in the main checkout.** They edit `REQUIREMENTS.md` and `milestones/`, which shouldn't need a merge.
+- Worktrees land at `.claude/worktrees/<name>/` on branch `worktree-<name>`, branched from the current `HEAD` (`worktree.baseRef: "head"` in `.claude/settings.json`), so they carry unpushed commits.
+- A worktree is a fresh checkout: no build artifacts, no dependencies, no gitignored config beyond what `.worktreeinclude` copies. Install/build before running tests there.
+- Finish by telling the user the merge-back line: `git merge worktree-<name>` from the main checkout.
+- Launching a session directly in a worktree also works: `claude -w <name>` (add `--tmux` for a split).
+
 ## Git Workflow
 - **`main` is the stable branch**: Should always compile and pass tests.
-- **Commit per logical change**: One commit per subtask or coherent change. Not one commit per file.
-- **Commit messages**: Short imperative description of what changed and why. Reference milestone if relevant (e.g., "M-FIRST.1: Add initial scaffolding").
+- **Commit code changes when the gate passes**: A session that changed code ends with a commit, once tests/build pass and the milestone file is updated. One commit per subtask or coherent change — not one commit per file.
+- **Doc-only changes are left uncommitted**: `REQUIREMENTS.md`, `milestones/`, `TECH_DEBT.md`, and `CLAUDE.md` edits made without a code change stay in the working tree. Name the files you changed in your report and let the user commit them.
+- **Stage deliberately**: `git add` the files you touched. Never `git add -A`.
+- **Commit messages**: Short imperative description of what changed and why. Reference the milestone if relevant (e.g., "M-FIRST.1: Add initial scaffolding"); use `refactor: …` for tech-debt work.
+- **Never push**: No `git push`, no PRs. The user reviews and pushes.
 - **Never use `git checkout` to revert**: When reverting changes, manually undo them instead of using `git checkout`, `git restore`, or `git reset`. Only use them if the user explicitly approves.
+
+## Automated Formatting
+A `PostToolUse` hook (`.claude/hooks/format-edited-file.sh`) formats every file written or edited and reports fast per-file lint failures back into the session. Fix what it reports as you go. It never blocks a tool call, and silently skips languages whose formatter isn't installed.
 
 ## Dependencies
 <!-- INJECT:DEPENDENCY_PHILOSOPHY -->

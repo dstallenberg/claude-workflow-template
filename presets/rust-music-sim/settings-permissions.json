@@ -1,12 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)",
-      "Bash(cargo build:*)",
       "Bash(cargo:*)",
-      "Bash(grep:*)",
-      "Bash(wc:*)",
-      "Bash(ls:*)",
+      "Bash(rustfmt:*)",
       "WebSearch",
       "WebFetch(domain:crates.io)",
       "WebFetch(domain:docs.rs)"

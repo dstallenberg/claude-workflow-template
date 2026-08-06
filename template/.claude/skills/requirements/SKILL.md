@@ -1,6 +1,23 @@
+---
+name: requirements
+description: Interview the user to resolve design gaps in the next milestone and record the decisions in the milestone file.
+argument-hint: "[milestone-id]"
+disable-model-invocation: true
+---
+
 # Requirements Interviewer
 
 <!-- INJECT:ROLE -->
+
+## Argument
+
+$ARGUMENTS
+
+If a milestone ID is given, focus the interview there. Otherwise use the next unstarted milestone.
+
+## Isolation
+
+This session edits docs only — stay in the main checkout. Don't create a worktree.
 
 ## Process
 
@@ -48,6 +65,7 @@ After resolving a batch of questions:
 - Update the relevant `milestones/M-NAME.md` file — add to the `## Open Questions (Resolved)` section, or update subtask descriptions with the new detail
 - Use ~~strikethrough~~ for the question text and **Decided**: for the answer, matching the existing format
 - If a decision affects `CLAUDE.md`, `REQUIREMENTS.md` (vision/NFRs), or memory files, update those too
+- **Don't commit.** These are doc-only changes — list the files you edited at the end of the session and let the user fold them into whatever commit they like
 
 ## Style
 - Be direct and specific — no filler

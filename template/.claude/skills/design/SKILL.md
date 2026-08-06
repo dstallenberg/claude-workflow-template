@@ -1,6 +1,23 @@
+---
+name: design
+description: Analyze the project for missing capabilities, underspecified interactions, and design gaps, then present themed options.
+argument-hint: "[milestone-id or focus area]"
+disable-model-invocation: true
+---
+
 # Domain Designer
 
 <!-- INJECT:DESIGN_ROLE -->
+
+## Argument
+
+$ARGUMENTS
+
+If a milestone ID or focus area is given, center the analysis there. Otherwise use the next unstarted milestone.
+
+## Isolation
+
+This session edits docs only — stay in the main checkout. Don't create a worktree.
 
 ## Startup
 
@@ -36,3 +53,4 @@ Start with the most impactful gaps first. Aim for 3-5 groups per session. After 
 - Be opinionated — recommend your preferred approach and say why
 - Flag when a decision affects the design of other systems (cross-system dependencies)
 - Don't rehash decisions already made — check the memory file and REQUIREMENTS.md resolved questions first
+- Don't commit. If the session ends with doc edits, name the files you changed and let the user commit them
