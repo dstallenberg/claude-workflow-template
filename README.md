@@ -1,6 +1,6 @@
 # Claude Workflow Template
 
-A reusable project scaffold for milestone-driven development with Claude Code. Provides skills (`/dev`, `/requirements`, `/design`, `/refactor`, `/refactor-investigation`, `/status`), a formatting hook, worktree-based session isolation, document templates, and language/domain presets.
+A reusable project scaffold for milestone-driven development with Claude Code. Provides skills (`/dev`, `/requirements`, `/design`, `/refactor`, `/refactor-investigation`, `/status`, `/context-audit`), a formatting hook, worktree-based session isolation, document templates, and language/domain presets.
 
 ## What You Get
 
@@ -12,6 +12,7 @@ A reusable project scaffold for milestone-driven development with Claude Code. P
 - **`/refactor-investigation`** — surveys the codebase for new tech debt (long files, panics, duplication, architectural friction) and appends it to `TECH_DEBT.md`. Idempotent — skips items already tracked
 - **`/refactor [item]`** — executes a single open `[ ]` item from `TECH_DEBT.md`: you pick which, it implements surgically, runs the gate, marks it resolved, commits
 - **`/status`** — milestone progress, in-flight worktrees, uncommitted work, next recommended action
+- **`/context-audit [--fix]`** — measures what every session pays for up front (`CLAUDE.md`, the memory index), memory hygiene, research-index and findings-ledger coverage, and whether the paper corpus is greppable; turns each warning into a prioritized fix and applies them on request. Its `audit.py` is read-only and stdlib-only
 
 **Automation**
 
@@ -24,6 +25,14 @@ A reusable project scaffold for milestone-driven development with Claude Code. P
 - `milestones/M-NAME.md` — numbered subtask checklists with resolved design questions
 - `TECH_DEBT.md` — refactor candidates, same `[ ]` / `[x] ✅ <date>` convention (created on first `/refactor-investigation`)
 - `CLAUDE.md` — conventions, architecture, git and worktree policy
+- `research/` — dated research notes (`YYYY-MM-DD-<slug>.md`) indexed in `research/INDEX.md`; `docs/` stays the curated reference that cites them
+- `research/FINDINGS.md` — the verdict ledger: one row per tested claim (KEEP / OPT-IN / DROP / OPEN) with its evidence, kept current so settled questions aren't re-run
+
+**Research paper corpus** (`research/papers/`)
+
+- `fetch.py` harvests every arXiv ID and DOI cited in the repo's Markdown and downloads each PDF over open-access routes only (arXiv → Unpaywall → publisher OA → Europe PMC). PDFs are gitignored; it regenerates `MANIFEST.md` (identifier → file → citing docs) and `not_downloaded_papers.md` (what it couldn't get, with the name to save a manual copy under). Unpaywall's contact email comes from `$RESEARCH_EMAIL`, else `git config user.email`
+- `extract_text.py` — run at the end of every fetch: writes a plain-text copy of each PDF to `research/papers/text/` (gitignored, incremental, needs poppler's `pdftotext`) so the papers are greppable
+- `CORPUS.md` — the curated per-paper digest; `corpus_status.py` lists PDFs not yet digested
 
 ## Quick Start
 
@@ -40,7 +49,7 @@ setup.sh --list-presets               # see what's available
 setup.sh --force                      # refresh skills/hooks/settings in an existing project
 ```
 
-`--force` is the upgrade path: it refreshes the machinery (`.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`), backs up anything it replaces as `<file>.bak`, and never touches `REQUIREMENTS.md`, `CLAUDE.md`, or `milestones/`.
+`--force` is the upgrade path: it refreshes the machinery (`.claude/skills/`, `.claude/hooks/`, `.claude/settings.json`, the `research/papers/` scripts and README), backs up anything it replaces as `<file>.bak`, and never touches `REQUIREMENTS.md`, `CLAUDE.md`, `milestones/`, `research/INDEX.md`, `research/FINDINGS.md`, or `CORPUS.md`.
 
 ## Workflow
 
@@ -55,6 +64,7 @@ Ongoing, alongside milestone work:
 - **`/refactor-investigation`** after shipping a milestone, to capture accumulated debt
 - **`/refactor`** when you want to spend a session paying debt down instead of shipping
 - **`/status`** to see where every parallel session left things
+- **`/context-audit`** when `CLAUDE.md` or the memory index has grown, or sessions keep re-deriving known results
 
 ## Parallel Sessions
 
@@ -174,6 +184,8 @@ your-project/
       refactor/SKILL.md
       refactor-investigation/SKILL.md
       status/SKILL.md
+      context-audit/SKILL.md
+      context-audit/audit.py   # read-only knowledge-organisation report
     hooks/
       format-edited-file.sh    # PostToolUse formatter + linter
     settings.json              # hooks, worktree base ref, permissions (commit this)
@@ -185,6 +197,19 @@ your-project/
   TECH_DEBT.md                 # refactor candidates (created on first /refactor-investigation)
   milestones/
     M-EXAMPLE.md               # format reference (delete when you have real milestones)
+  research/
+    INDEX.md                   # dated research notes, newest first
+    FINDINGS.md                # verdict ledger, kept current
+    YYYY-MM-DD-<slug>.md       # one note per study, scout or postmortem
+    papers/
+      fetch.py                 # harvest citations, download open-access PDFs
+      corpus_status.py         # PDFs not yet digested in CORPUS.md
+      extract_text.py          # greppable text/ copies of the PDFs
+      README.md
+      CORPUS.md                # curated per-paper digest
+      MANIFEST.md              # generated: identifier → file → citing docs
+      *.pdf                    # the corpus (gitignored)
+      text/                    # extracted plain text (gitignored)
 ```
 
 Upgrading from an older version of this template: your old `.claude/commands/*.md` files still work, but they shadow the new skills of the same name. `setup.sh` warns about them — delete them once you've moved any local edits into `.claude/skills/`.

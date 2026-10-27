@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_DIR="$SCRIPT_DIR/template"
 PRESETS_DIR="$SCRIPT_DIR/presets"
 
-SKILLS=(dev requirements design refactor refactor-investigation status)
+SKILLS=(dev requirements design refactor refactor-investigation status context-audit)
 
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
@@ -35,8 +35,9 @@ Usage: setup.sh [options]     (run from inside the target project)
 Options:
   --name NAME      Project name (default: the current directory's name)
   --preset NAME    Preset to inject (default: detected from the repo, else custom)
-  --force          Refresh the machinery — skills, hooks, .claude/settings.json.
-                   Documents (REQUIREMENTS.md, CLAUDE.md, milestones/) are never
+  --force          Refresh the machinery — skills, hooks, .claude/settings.json,
+                   research/papers/ scripts. Documents (REQUIREMENTS.md, CLAUDE.md,
+                   milestones/, research/INDEX.md, FINDINGS.md, CORPUS.md) are never
                    touched. Overwritten files are backed up as <file>.bak.
   --list-presets   List available presets and exit
   -h, --help       Show this help
@@ -235,6 +236,17 @@ fi
 install_file "$merged_settings" ".claude/settings.json" || true
 rm -f "$merged_settings"
 
+# --- Skill helper scripts (machinery: refreshed by --force) ---
+
+install_file "$TEMPLATE_DIR/.claude/skills/context-audit/audit.py" ".claude/skills/context-audit/audit.py" --exec || true
+
+# --- Research paper tooling (machinery: refreshed by --force) ---
+
+for script in fetch.py corpus_status.py extract_text.py; do
+    install_file "$TEMPLATE_DIR/research/papers/$script" "research/papers/$script" --exec || true
+done
+install_file "$TEMPLATE_DIR/research/papers/README.md" "research/papers/README.md" || true
+
 # --- Documents (created once, never refreshed by --force) ---
 
 if [[ ! -f "REQUIREMENTS.md" ]]; then
@@ -280,6 +292,16 @@ if [[ ! -f "milestones/M-EXAMPLE.md" ]]; then
 else
     info "Skipping milestones/M-EXAMPLE.md (already exists)"
 fi
+
+for doc in research/INDEX.md research/FINDINGS.md research/papers/CORPUS.md; do
+    if [[ ! -f "$doc" ]]; then
+        mkdir -p "$(dirname "$doc")"
+        cp "$TEMPLATE_DIR/$doc" "$doc"
+        ok "Wrote $doc"
+    else
+        info "Skipping $doc (already exists)"
+    fi
+done
 
 if [[ ! -f ".worktreeinclude" ]]; then
     cp "$TEMPLATE_DIR/.worktreeinclude.template" ".worktreeinclude"

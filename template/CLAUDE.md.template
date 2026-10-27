@@ -21,6 +21,23 @@
 
 **After completing a subtask**: mark it `[x]` in the milestone file, and if it's the last subtask, mark the milestone ✅ in the `REQUIREMENTS.md` index table.
 
+## Research
+- **Dated notes live in `research/YYYY-MM-DD-<topic-slug>.md`**, one row each in `research/INDEX.md`, newest first: literature scouts, measurements, probes, postmortems. A note records what was found on that day and is not rewritten afterwards; a later finding is a new note citing the old one.
+- **`docs/` is the curated, current reference**; `research/` is the evidence behind it. A durable conclusion moves into the milestone or doc that acted on it, citing the note.
+- **Decisions cite research.** A resolved design question that rests on a paper or a measurement names it: an arXiv ID or DOI returned by a real search — never one from memory — or the `research/` note.
+- **Every cited paper is kept locally.** `python3 research/papers/fetch.py` harvests every arXiv ID and DOI in the repo's Markdown and downloads it to `research/papers/` over open-access routes only (PDFs gitignored, `MANIFEST.md` regenerated). Run it after adding citations, then digest the new PDFs into `research/papers/CORPUS.md` (`corpus_status.py` lists the gaps).
+- Writing a research note is doc-only work: it stays in the main checkout and is left uncommitted like any other doc edit.
+- **`research/FINDINGS.md` is the verdict ledger**: one row per tested claim (KEEP / OPT-IN / DROP / OPEN), with its evidence. Unlike the notes it is kept current: when a note changes a verdict, edit the row in the same session.
+
+## Finding Past Work
+Look things up in this order before re-deriving or re-running anything:
+1. `research/FINDINGS.md`: tested claims and their current verdicts. Check it before proposing an experiment.
+2. `research/INDEX.md`: one row per dated note, newest first.
+3. `milestones/M-NAME.md` for decisions and results; `docs/completed-milestones.md` for full milestone summaries.
+4. Papers: `research/papers/CORPUS.md` (curated digest), then grep the full text in `research/papers/text/` (written by `fetch.py` / `extract_text.py`).
+
+Use an Explore subagent for broad searches so only its conclusion enters the context. Run `/context-audit` when this file or the memory index has grown, or sessions keep re-deriving known results.
+
 ## Conventions
 <!-- INJECT:CONVENTIONS -->
 
@@ -61,7 +78,7 @@ A `PostToolUse` hook (`.claude/hooks/format-edited-file.sh`) formats every file 
 <!-- INJECT:DEPENDENCY_PHILOSOPHY -->
 
 ## Completed Milestones
-<!-- Updated as milestones are finished -->
+<!-- One line per finished milestone (what shipped + its headline result or verdict). The full summary goes in docs/completed-milestones.md, so this file stays small: it is loaded on every session. -->
 
 ## Logging
 <!-- INJECT:LOGGING -->

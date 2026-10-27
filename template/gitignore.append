@@ -1,3 +1,5 @@
 # Claude Code
 .claude/worktrees/
 .claude/settings.local.json
+research/papers/**/*.pdf
+research/papers/text/

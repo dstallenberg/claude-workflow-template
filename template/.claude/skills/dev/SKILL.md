@@ -75,9 +75,9 @@ Then:
    - This is mandatory — never skip this step, even if the user doesn't mention it
 2. Update `CLAUDE.md` if the change affects:
    - Project structure (new files/modules)
-   - Completed milestones (if this was the last subtask in a milestone)
+   - Completed milestones (if this was the last subtask in a milestone): one line in `CLAUDE.md`, the full summary appended to `docs/completed-milestones.md`
    - System execution order or component list
-3. Update memory files if the implementation revealed important patterns, architectural decisions, or context for future sessions
+3. Update memory files if the implementation revealed important patterns, architectural decisions, or context for future sessions. If a measurement settled or overturned a claim, add or edit its row in `research/FINDINGS.md`
 4. **Commit** — the gate has passed and the bookkeeping is done, so land it:
    - `git add` only the files you touched (source + milestone file + any doc you updated). Never `git add -A`
    - Message: `M-NAME.1: <imperative summary>` — e.g. `M-FIRST.1: Add world grid and chunk loader`
