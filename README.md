@@ -6,7 +6,7 @@ A reusable project scaffold for milestone-driven development with Claude Code. P
 
 **Skills** (`.claude/skills/<name>/SKILL.md`)
 
-- **`/dev [subtask-id]`** — implements one subtask: enters a worktree, plans, codes, runs the build/test gate, marks the subtask `[x]`, and commits
+- **`/dev [subtask-id | milestone]`** — implements one subtask (or a whole milestone, one subtask and one commit at a time) in a `dev/<ID>` worktree: plans, codes, runs the build/test gate, runs up to three rounds of independent review by a fresh reviewer agent, marks the subtask `[x]`, and commits on the branch. It never merges or pushes unless asked
 - **`/requirements [milestone]`** — interviews you about design gaps, presents A/B/C/D options, records decisions in the milestone file
 - **`/design [milestone]`** — analyzes the project for missing capabilities and underspecified interactions
 - **`/refactor-investigation`** — surveys the codebase for new tech debt (long files, panics, duplication, architectural friction) and appends it to `TECH_DEBT.md`. Idempotent — skips items already tracked
@@ -75,14 +75,16 @@ claude -w M-FIRST-1          # start a session in .claude/worktrees/M-FIRST-1
 claude -w M-FIRST-1 --tmux   # ...in a tmux split
 ```
 
-If you start a session in the main checkout and run `/dev` or `/refactor`, Claude enters a worktree itself (`CLAUDE.md` instructs it to). Doc-only work — `/requirements`, `/design`, `/refactor-investigation` — stays in the main checkout, so milestone edits never need a merge.
+If you start a session in the main checkout and run `/dev` or `/refactor`, Claude enters a worktree itself (`/dev` makes `.claude/worktrees/<ID>` on branch `dev/<ID>` from local `main`, and an existing `dev/<ID>` branch marks a subtask as claimed by another session; `CLAUDE.md` instructs it to). Doc-only work — `/requirements`, `/design`, `/refactor-investigation` — stays in the main checkout, so milestone edits never need a merge.
 
 When a subtask is done, merge it back from the main checkout:
 
 ```bash
-git merge worktree-M-FIRST-1
-git worktree remove .claude/worktrees/M-FIRST-1
+git merge --ff-only dev/M-FIRST.1
+git worktree remove .claude/worktrees/M-FIRST.1 && git branch -d dev/M-FIRST.1
 ```
+
+A `/refactor` worktree (made by `EnterWorktree`) is on branch `worktree-<name>`: `git merge worktree-<name>`.
 
 Details worth knowing:
 

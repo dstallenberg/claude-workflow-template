@@ -55,11 +55,11 @@ These standards must be followed when writing new code, not just checked before 
 ## Parallel Sessions (Worktrees)
 Several Claude sessions run against this repo at once, so code sessions are isolated in git worktrees.
 
-- **Code sessions (`/dev`, `/refactor`) run in a worktree.** If the session is not already in one (`git worktree list`, or a cwd under `.claude/worktrees/`), call `EnterWorktree` before editing code, named after the subtask — `M-FIRST-1` for `M-FIRST.1`, or a short kebab-case slug otherwise.
+- **Code sessions run in a worktree.** `/dev` creates `.claude/worktrees/<SUBTASK-ID>` on branch `dev/<SUBTASK-ID>` from local `main` (`git worktree add … -b dev/<ID> main`, then `EnterWorktree` into it); an existing `dev/<ID>` branch means another session has claimed that subtask. `/refactor` calls `EnterWorktree` with a short kebab-case name if the session is not already in a worktree.
 - **Doc-only sessions (`/requirements`, `/design`, `/refactor-investigation`) stay in the main checkout.** They edit `REQUIREMENTS.md` and `milestones/`, which shouldn't need a merge.
-- Worktrees land at `.claude/worktrees/<name>/` on branch `worktree-<name>`, branched from the current `HEAD` (`worktree.baseRef: "head"` in `.claude/settings.json`), so they carry unpushed commits.
+- `EnterWorktree`-created worktrees land at `.claude/worktrees/<name>/` on branch `worktree-<name>`, branched from the current `HEAD` (`worktree.baseRef: "head"` in `.claude/settings.json`), so they carry unpushed commits.
 - A worktree is a fresh checkout: no build artifacts, no dependencies, no gitignored config beyond what `.worktreeinclude` copies. Install/build before running tests there.
-- Finish by telling the user the merge-back line: `git merge worktree-<name>` from the main checkout.
+- Never merge into `main` or push unless the user asks. Finish by telling the user the merge-back commands: `git merge --ff-only dev/<ID>` (or `git merge worktree-<name>` for a `/refactor` worktree) from the main checkout, then remove the worktree and branch.
 - Launching a session directly in a worktree also works: `claude -w <name>` (add `--tmux` for a split).
 
 ## Git Workflow

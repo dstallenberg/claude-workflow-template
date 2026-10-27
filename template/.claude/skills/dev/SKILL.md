@@ -1,16 +1,22 @@
 ---
 name: dev
-description: Implement one milestone subtask end to end — isolate, plan, code, test, update the milestone file, commit.
-argument-hint: "[subtask-id | free-text description]"
+description: Implement a milestone subtask (or a whole milestone, one subtask at a time) end to end — worktree, plan, code, test, independent review, update the milestone file, commit.
+argument-hint: "[subtask-id | milestone | free-text description]"
 disable-model-invocation: true
 allowed-tools:
   - EnterWorktree
+  - ExitWorktree
+  - Agent
   - Bash(git status:*)
   - Bash(git diff:*)
   - Bash(git add:*)
   - Bash(git commit:*)
   - Bash(git log:*)
   - Bash(git worktree list:*)
+  - Bash(git worktree add:*)
+  - Bash(git branch:*)
+  - Bash(git show:*)
+  - Bash(git rebase main:*)
 ---
 
 # Developer Agent
@@ -23,13 +29,25 @@ $ARGUMENTS
 
 The argument is a subtask ID (e.g., `M-FIRST.1`, `M-FIRST.3`) or a free-text description of what to implement. If it is empty, determine the next unfinished subtask from the current milestone.
 
-## Isolation
+**Milestone mode**: the argument may also name a whole milestone (e.g. `all of M-FIRST`, `M-FIRST`). Then:
+- Work through its unfinished subtasks **in order, one at a time**, on a single branch `dev/<MILESTONE>` in worktree `.claude/worktrees/<MILESTONE>`. Later subtasks build on earlier ones, so stacked branches would only add merge work.
+- For **each** subtask, run the full cycle below: plan, implement, checks, independent review rounds, fixes, mark `[x]`, and **one commit per subtask**. Never batch several subtasks into one review or one commit.
+- Give the user a short status after each subtask's commit (what was built, review outcome), then continue to the next without waiting.
+- Stop and ask only for a genuine design question the milestone doesn't answer, or a choice that is the user's to make (for example how to install a missing toolchain).
 
-Do this before reading anything else.
+## Worktree (always — the user works in parallel)
 
-- If this session is already in a git worktree (`git worktree list` shows the current directory as a linked worktree, or the cwd is under `.claude/worktrees/`), stay where you are.
-- Otherwise call `EnterWorktree` with a name derived from the subtask — `M-FIRST-1` for subtask `M-FIRST.1`, or a short kebab-case slug for a free-text task. This keeps parallel sessions from editing the same files.
-- The worktree lands at `.claude/worktrees/<name>/` on branch `worktree-<name>`, branched from the current `HEAD`. A fresh worktree has no build artifacts or dependencies — install/build as the project requires before running tests.
+Do this before reading anything else. Never implement in the main checkout: the user and other dev sessions work there and in other worktrees at the same time.
+
+1. **Pick and claim the subtask.** List `git worktree list` and `git branch --list 'dev/*'`. A subtask with an existing `dev/<SUBTASK-ID>` branch is claimed by another session, so pick the next unfinished, unclaimed one (unless the user named one explicitly). For a free-text task, use a short kebab-case slug as the ID.
+2. **Create the worktree from local `main`** (not `origin/main`, which may lag behind):
+   `git worktree add .claude/worktrees/<SUBTASK-ID> -b dev/<SUBTASK-ID> main`, then switch into it with the `EnterWorktree` tool (`path` = that directory). If the session is already inside a worktree for this subtask, keep using it.
+3. **Set it up**: install dependencies with the project's install command (see `CLAUDE.md` Build & Run). Gitignored local data (e.g. a `data/` folder) only exists in the main checkout, so if you need it, symlink it: `ln -s <main-checkout>/data data`. Never copy private data into the worktree or commit it. `.worktreeinclude` lists the gitignored files copied in automatically.
+4. Everything below (reading, coding, review, milestone updates) happens inside the worktree.
+5. **Sandbox notes** for a worktree-isolated session:
+   - Keep shell commands simple. Long compound commands, `$HOME`, and absolute paths outside the worktree can be refused. Use relative paths for repo files, or put scripts in the scratchpad and run them with the file path as an argument.
+   - If the toolchain isn't on the session's PATH yet (for example right after installing it), prefix commands with `env PATH=<toolchain-bin-dir>:/usr/bin:/bin`.
+   - Inspect private/real data only with scripts that print **aggregates**: counts, codes, masked shapes. Never print personal or free-text values.
 
 ## Startup
 
@@ -67,22 +85,48 @@ Run the build/test gate first, and fix any failures before going further:
 
 <!-- INJECT:BUILD_COMMANDS -->
 
+- **Real-data check** when the subtask touches import, parsing or data handling and the project has real data available: run it against the real data with all output paths (databases, caches, generated files) pointing into the scratchpad, never into the real data folder, and print aggregates only. Compare the counts with any findings recorded in the milestone.
+- When a metric looks wrong, check the metric before "fixing" the code.
+
 Then:
 
-1. **Always update progress in the milestone file** (`milestones/M-NAME.md`):
+1. **Independent review (mandatory, automatic — don't ask the user first)**. Spawn a fresh `general-purpose` agent with the Agent tool. Never use `fork`, because a fork inherits your context and reasoning and is not unbiased. Don't pass it your plan, summary, or opinion of the code. Give it only:
+   - the subtask ID and the path of the milestone file
+   - the list of changed/added files (`git status --porcelain`) and the instruction to read the diff itself (`git diff` plus the new files)
+
+   Prompt it to act as a skeptical reviewer who did not write this code, and to check:
+   - **Goal fit**: does the change fully deliver the subtask as described, including the relevant resolved decisions in `## Open Questions (Resolved)`? List anything missing, partial, or beyond scope.
+   - **Correctness**: bugs, unhandled edge cases (use the milestone's findings and known quirks), and wrong assumptions. Each finding needs a concrete failing input or scenario.
+   - **Tests**: do they actually exercise the subtask's requirements (happy path + edge cases), or only the trivial paths? Are any requirements untested?
+   - **Project rules** from `CLAUDE.md`: conventions, architecture rules, no private data in fixtures/logs, named constants, logging, error handling, typing.
+   - It may run the test/typecheck/lint/build commands, and throwaway scripts in its own scratchpad subfolder (adversarial inputs, real-data checks with aggregates only), but must not edit, create or delete repo files, or run state-changing git commands.
+   - Tell it the tooling constraints from the "Sandbox notes" above (PATH prefix, simple commands), so it doesn't waste its run.
+   - Output: verdict `PASS` or `CHANGES NEEDED`, then findings ranked `blocking` / `should-fix` / `nit`, each with file:line, the reason and a concrete scenario.
+
+   **Review cycle (automatic, up to 3 rounds per subtask):**
+   - After each round, fix every `blocking` and `should-fix` finding, plus the cheap nits, or record a short justification where you disagree. Rerun the gate, and add a test for each fix.
+   - Run a **fresh** reviewer (a new agent, never the previous one) whenever the fixes were substantial: a blocking fix, a behaviour change, or a schema change. Stop after `PASS` with only small follow-ups, or after round 3.
+   - **After round 3** you still fix what it found, but you may not run a 4th round. Prove those last fixes with tests, including a mutation check where practical (break the fix and confirm a test fails). In the summary and the milestone notes, state clearly that they weren't re-reviewed. Report any remaining disagreements to the user.
+   - A finding that needs a decision the user hasn't made: choose the safest reasonable default, record it as a decision in the milestone file, and mention it in the summary so the user can override it.
+   - Write decisions and "as built" behaviour into the milestone file under the subtask, so later subtasks and reviewers see them.
+2. **Always update progress in the milestone file** (`milestones/M-NAME.md`):
    - Mark the completed subtask as done: change `- [ ]` to `- [x]`
    - If this was the last subtask in a milestone, also mark the milestone ✅ in the `REQUIREMENTS.md` index table
    - This is mandatory — never skip this step, even if the user doesn't mention it
-2. Update `CLAUDE.md` if the change affects:
+   - **Before marking the milestone ✅, check `main` for requirement changes.** The user may refine requirements on `main` in parallel. Run `git diff <branch-base> main -- milestones/M-NAME.md REQUIREMENTS.md`. Any requirement added for an already-built subtask is open work: add it as a new unchecked subtask, and don't mark the milestone ✅.
+3. Update `CLAUDE.md` if the change affects:
    - Project structure (new files/modules)
    - Completed milestones (if this was the last subtask in a milestone): one line in `CLAUDE.md`, the full summary appended to `docs/completed-milestones.md`
    - System execution order or component list
-3. Update memory files if the implementation revealed important patterns, architectural decisions, or context for future sessions. If a measurement settled or overturned a claim, add or edit its row in `research/FINDINGS.md`
-4. **Commit** — the gate has passed and the bookkeeping is done, so land it:
+4. Update memory files if the implementation revealed important patterns, architectural decisions, or context for future sessions. If a measurement settled or overturned a claim, add or edit its row in `research/FINDINGS.md`
+5. **Commit on the branch** `dev/<SUBTASK-ID>` (or `dev/<MILESTONE>` in milestone mode) in the worktree — the gate has passed, the review is done and the bookkeeping is in, so land it:
    - `git add` only the files you touched (source + milestone file + any doc you updated). Never `git add -A`
    - Message: `M-NAME.1: <imperative summary>` — e.g. `M-FIRST.1: Add world grid and chunk loader`
    - Code and the milestone checkbox go in the **same** commit
-   - **Do not push.** No `git push`, no PR — the user reviews and pushes
-   - If the tests or build did not pass, do not commit. Report the failure instead
-5. Report: what was built, which files changed, how many tests were added/pass, and the commit subject. If you are in a worktree, end with the merge-back line for the user:
-   `git merge worktree-<name>` (run from the main checkout)
+   - One commit per subtask. If the tests or build did not pass, do not commit. Report the failure instead
+   - When the work is done (after the last subtask in milestone mode), `git rebase main`. Rerun the tests after a rebase.
+   - On a conflict in a **doc file only** (the milestone file is typical, because the user edits requirements in parallel): take the branch's version at each step (`git show <commit>:<file> > <file>`, never `git checkout`/`restore`). Afterwards, restore `main`'s additions in a separate, clearly labelled commit, and treat any new requirement as open work (see step 2).
+   - On a conflict in code, resolve it if it's trivial, otherwise stop and report.
+   - **Do not merge into `main` and do not push** unless the user says so. No PR. The user's main checkout may have work in progress. Leave the worktree in place and give the user the merge commands: `git merge --ff-only dev/<ID>` (from the main checkout), then `git worktree remove .claude/worktrees/<ID> && git branch -d dev/<ID>`.
+   - If the user asks you to merge: leave the worktree with `ExitWorktree` (`keep`), check that the main checkout is clean, `git merge --ff-only`, remove the worktree and branch, then reinstall dependencies and run the tests on `main`.
+6. Report: what was built, which files changed, how many tests were added/pass, the commit subject(s), and the review outcome. Cover the rounds, what was fixed, anything fixed after the last allowed round (not re-reviewed), decisions you made on the user's behalf, and any unresolved disagreements. End with the merge commands above.
